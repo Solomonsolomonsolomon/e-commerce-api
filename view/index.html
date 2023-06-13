@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let a=[]
+     
+      async function login(){
+            let h=new Headers();
+        h.append('Content-Type','application/json')
+       await fetch('http://127.0.0.1:5678/login',{
+            method:'post',
+            headers:h,
+          //  credentials:'include',
+            body:JSON.stringify({
+                email:document.getElementById('email').value,
+                password:document.getElementById('pass').value
+            }),
+        }).then((e)=>{
+            if(!e.ok){
+                console.log('not ok')
+                document.getElementById('p').textContent='login failed'
+            }else{
+                document.getElementById('p').textContent='successful login';
+            }
+            return e.json()
+        }).then(e=>{
+        a[0]=e.accessToken;
+        a[1]=e.refreshToken;
+        console.log(e)
+        })
+     
+        }
+ 
+        async function home(){
+            let headers=new Headers();
+            headers.append('Authorization',`Bearer ${a[0]}`)
+          await fetch('http://127.0.0.1:5678/',{
+            headers:headers
+          }).then(e=>{
+            if(!e.ok){
+                document.getElementById('p').textContent='home failed'
+                if(e.status==401){
+                    refresh()
+                    home()
+                }
+            }else{
+             
+                document.getElementById('p').textContent=`home successful`
+                
+            }
+            return e.json()
+          })
+    }
+     
+    async function refresh(){
+
+     await fetch('http://127.0.0.1:5678/refresh',{
+        method:'post',
+        headers:{
+            "Content-Type":"application/json",
+            refresh:a[1],
+        }
+        
+     }).then(e=>{
+        return e.json()
+     }).then(e=>{
+        a[0]=e;
+     })
+    }
+
+   async function logout(){
+        await fetch('http://localhost:5678/logout',{
+            headers:{
+                "Content-Type":'application/json',
+                "refresh":a[1]
+            }
+        }).then(e=>{
+            if(!e.ok){document.getElementById('p').textContent='error logging out';console.log(e.status)}
+             else{
+               
+                a[0]=''
+                document.getElementById('p').textContent='logged out succesfully'
+             }
+        })
+   }
+
+   async function register(){
+      let res=await fetch('http://localhost:5678/register',{
+        method:'post',
+        body:JSON.stringify({
+            email:document.getElementById('email').value,
+            password:document.getElementById('pass').value,
+            password2:document.getElementById('pass').value,
+        }),
+        headers:{
+            "Content-Type":'application/json'
+        }
+      })
+      let json=await res.json();
+      if(json?.msg && !res.ok){document.getElementById('p').textContent=json.msg}
+      if(json?.accessToken && res.ok){a[0]=json.accessToken;a[1]=json.refreshToken;console.log('registered')}
+   }
+   
+   </script>
+
+    <p id="p"></p>
+   <button onclick="login()">login</button>
+   <button onclick="home()">home</button>
+   <button onclick="refresh()">refresh token</button>
+   <button onclick="logout()">logout</button>
+   <button onclick="register()">register</button>
+<br><br><br>
+   <input type="text" placeholder="email" id="email">
+   <input type="text" placeholder="password" id="pass">
+</body>
+</html>
