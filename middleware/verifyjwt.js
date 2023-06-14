@@ -14,7 +14,7 @@ module.exports.verifyJWT=(req,res,next)=>{
             
             next();
         })
-
+it
 
      }else{
         res.status(403).json({msg:"token was not provided"})
