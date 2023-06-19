@@ -11,9 +11,12 @@ const loginRoute = require("./route/login.route");
 const refreshRoute = require("./route/refreshToken.route");
 const logoutRoute = require("./route/logout.route");
 const users = require("./route/users.route");
-const { User } = require("./model/db");
+const products = require("./route/product.route");
+const cart = require("./route/cart.route");
+const { User,Cart } = require("./model/db");
 const path = require("path");
 const session = require("express-session");
+const { default: mongoose } = require("mongoose");
 
 //session
 app.use(
@@ -47,7 +50,9 @@ app.use("/auth/login", loginRoute);
 app.use("/auth/logout", logoutRoute);
 app.use("/refresh", refreshRoute);
 
-app.use(users);//users route
+app.use(users); //users route
+app.use(products); //products routes
+app.use(cart); //cart routes
 app.get("/", verifyJWT, (req, res) => {
   res.json({ user: req.user, hi: "hello" });
 });

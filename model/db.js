@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect("mongodb://localhost:27017/jwt001")
   .then(() => {
     console.log("database connected successfully");
   })
@@ -33,10 +33,43 @@ const productSchema = new Schema({
   color: String,
   category: String,
   image: String,
+  quantity: String,
 });
+const cartSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    items: [
+      {
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        size: {
+          type: String,
+          required: true,
+        },
+        color: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
 let User = model("User", userSchema);
 let Product = model("Product", productSchema);
+let Cart = model("Cart", cartSchema);
 module.exports = {
   User,
   Product,
+  Cart,
 };
