@@ -108,7 +108,6 @@ module.exports.removeItemsFromCart = async (req, res) => {
           .catch((err) => {
             return res.status(400).json({ msg: err.message });
           });
-       
       } else {
         res
           .status(400)

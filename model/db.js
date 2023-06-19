@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 mongoose
-  .connect("mongodb://localhost:27017/jwt001")
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("database connected successfully");
   })
