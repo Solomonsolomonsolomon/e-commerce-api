@@ -1,4 +1,4 @@
-const { Product } = require("./../model/db");
+const { Product, Cart } = require("./../model/db");
 module.exports.getProducts = async (req, res) => {
   await Product.find({})
     .then((e) => {
@@ -51,11 +51,9 @@ module.exports.postProduct = async (req, res) => {
         }
       });
   } else {
-    res
-      .status(403)
-      .json({
-        msg: "name,price,quantity and imageURL(base64) are required fields",
-      });
+    res.status(403).json({
+      msg: "name,price,quantity and imageURL(base64) are required fields",
+    });
   }
 };
 
@@ -79,12 +77,48 @@ module.exports.updateProduct = async (req, res) => {
 
 module.exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
-  await Product.findOneAndRemove({ _id: id }).then((e) => {
-    if (!e) {
-      res.status(404).json({
-        msg: "either product doesnt exist or product already deleted",
+  try {
+    await Product.findOne({ _id: id }).then(async (product) => {
+      if (!product) {
+        throw new Error(
+          "either product doesnt exist or product already deleted"
+        );
+      }
+      await Cart.findOne({ [`items.product`]: id }).then(async (e) => {
+        let indexes = [];
+       
+        if (e) {
+          
+          for (i in e.items) {
+            if (e.items[i].product == id) {
+              indexes.push(i);
+            }
+          }
+        console.log(indexes)
+          if (indexes.length >= 0) {
+            if (e.items.length > 1) {
+              for (i in indexes) {
+                e.items.splice(parseInt(indexes[i]), 1);
+                console.log(parseInt(indexes[i]))
+              }
+              e.save();
+            } else if (e.items.length == 1) {
+              await Cart.findOneAndRemove({ userId: e.userId });
+            }
+          }
+
+
+
+
+
+        }
       });
-    }
-    res.status(200).json({ msg: "deleted product successfully" });
-  });
+      await Product.findOneAndRemove({
+        _id: product._id,
+      });
+      return res.status(200).json({ msg: "product deleted successfully" });
+    });
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
+  }
 };

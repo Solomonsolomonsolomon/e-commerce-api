@@ -30,10 +30,11 @@ const productSchema = new Schema({
   name: String,
   description: String,
   price: Number,
-  color: String,
-  category: String,
+  color: [String],
+  category: [String],
+  size:[String],
   image: String,
-  quantity: String,
+  quantity: Number,
 });
 const cartSchema = new Schema(
   {
@@ -50,6 +51,7 @@ const cartSchema = new Schema(
         quantity: {
           type: Number,
           required: true,
+          min: 0,
         },
         size: {
           type: String,
