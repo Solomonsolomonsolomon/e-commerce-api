@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect("mongodb://localhost:27017/jwt001")
   .then(() => {
     console.log("database connected successfully");
   })
@@ -31,8 +31,8 @@ const productSchema = new Schema({
   description: String,
   price: Number,
   color: [String],
+  size: [String],
   category: [String],
-  size:[String],
   image: String,
   quantity: Number,
 });
@@ -66,12 +66,33 @@ const cartSchema = new Schema(
   },
   { timestamps: true }
 );
-
+const orderSchema = new Schema(
+  {
+    price: Number,
+    products: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+    currency: {
+      type: String,
+      default: "NGN",
+    },
+    gateway: {
+      type: String,
+      default: "paystack",
+    },
+  },
+  { timestamps: true }
+);
 let User = model("User", userSchema);
 let Product = model("Product", productSchema);
 let Cart = model("Cart", cartSchema);
+let Order = model("Order", orderSchema);
 module.exports = {
   User,
   Product,
   Cart,
+  Order,
 };

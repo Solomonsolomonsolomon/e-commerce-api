@@ -14,7 +14,6 @@ function addNewProduct() {
   }).save();
 }
 
-
 module.exports.getCartItems = async (req, res) => {
   const { userId } = req.params;
   Cart.findOne({ userId })
@@ -74,7 +73,6 @@ module.exports.addToCart = async (req, res) => {
             // await Cart.findOneAndRemove({ items: newCart.items });
           }
 
-        
           return res.status(400).json({ err: err.message });
         }
       }
@@ -98,19 +96,19 @@ module.exports.addToCart = async (req, res) => {
           }
           if (prod.quantity < quantity) {
             throw new Error("insufficient stocks for particular product");
+            s;
           }
-          prod.quantity -= quantity; 
+          prod.quantity -= quantity;
           await cart.save();
           await prod.save();
           return res.status(200).json({ msg: "added to cart successfully" });
         } catch (err) {
           //#rollback changes
-         
+
           // Object.assign(cart, myCartClone);
           //await cart.save()
           //await Cart.findOneAndRemove({ items: cart.items });
 
-        
           return res.status(400).json({ msg: err.message });
         }
       }
@@ -172,19 +170,23 @@ module.exports.removeItemsFromCart = async (req, res) => {
         console.log(index);
 
         if (index !== -1) {
-         // let prod = cart.items[index].product;
+          // let prod = cart.items[index].product;
           cart.items.splice(index, 1);
-          await Product.findOne({ _id: await cart.items[index].product}).then(async (e) => {
-            if (!e) {
-              throw new Error(
-                "product you are trying to delete either doesnt exist or already deleted"
-              );
+          await Product.findOne({ _id: await cart.items[index].product }).then(
+            async (e) => {
+              if (!e) {
+                throw new Error(
+                  "product you are trying to delete either doesnt exist or already deleted"
+                );
+              }
+              e.quantity += cart.items[index].quantity;
+              await e.save();
+              await cart.save();
+              return res
+                .status(200)
+                .json({ msg: "removed item successfully from cart" });
             }
-            e.quantity += cart.items[index].quantity;
-            await e.save();
-            await cart.save();
-            return res.status(200).json({msg:"removed item successfully from cart"})
-          });
+          );
         } else {
           throw new Error("either item doesnt exist or item already deleted");
         }
