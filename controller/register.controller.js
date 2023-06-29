@@ -39,7 +39,7 @@ module.exports.register = async (req, res, next) => {
           await e.save();
           res
             .status(201)
-            .json({ accessToken, refreshToken, email: e.email, id: e._id });
+            .json({ accessToken, refreshToken, email: e.email, id: e._id ,role:e.role});
         })
         .catch((err) => {
           res.status(400).json({ msg: "err in registering" });
