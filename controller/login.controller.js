@@ -26,6 +26,7 @@ module.exports.login = async (req, res, next) => {
           id: user._id,
           email: user.email,
           role: user.role,
+        
         });
       } else {
         res.status(401).json({ msg: "invalid login credentials" });
