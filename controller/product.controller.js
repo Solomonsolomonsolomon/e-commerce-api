@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const { Product, Cart } = require("./../model/db");
 
 module.exports.getProducts = async (req, res) => {
@@ -94,7 +95,7 @@ module.exports.updateProduct = async (req, res) => {
           throw new Error("product not found");
         }
         Object.assign(prod, req.body);
-       await prod.save().then(() => {
+        await prod.save().then(() => {
           res.status(200).json({ msg: "product updated successfully" });
         });
       })
@@ -144,5 +145,36 @@ module.exports.deleteProduct = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ msg: err.message });
+  }
+};
+
+module.exports.sortByPopular = async (req, res) => {
+  try {
+    await Product.find()
+      .sort({
+        __v: -1,
+      })
+      .limit(5)
+      .then((e) => {
+        res.status(200).json(e);
+      });
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+};
+
+module.exports.increaseProductsViews = async (req, res) => {
+  const { _id } = req.params;
+  try {
+    await Product.findOneAndUpdate({ _id }, { $inc: { __v: 1 } }).then(
+      async (product) => {
+        if (!product) {
+          throw new Error("enter valid product id");
+        }
+        res.status(200).json({ msg: "view count updated" });
+      }
+    );
+  } catch (error) {
+    res.status(400).json({ err: error.message });
   }
 };
